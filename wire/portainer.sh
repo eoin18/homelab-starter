@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Create Portainer's admin account (only possible in the first minutes after a fresh start).
-set -euo pipefail
+set -eu
 . "$HS_ROOT/lib/common.sh"
 marker_done portainer-admin && exit 0
 wait_for_http "https://localhost:9443" 120 || { curl -sk -o /dev/null https://localhost:9443 || exit 1; }

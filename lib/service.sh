@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Sourced by services/*.sh. Config + secrets are already exported by install.sh.
-set -euo pipefail
+set -eu   # no pipefail: a "no match" mid-pipeline (grep, getent, ls) must not abort silently
 if [ "${HS_DRY_RUN:-0}" = 1 ]; then
   docker() { printf '    [dry-run] docker'; printf ' %q' "$@"; echo; }
   recreate() { :; }

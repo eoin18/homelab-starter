@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # homelab-starter installer. Usage: sudo ./install.sh [--reconfigure] [--add <bundle>] [--remove <bundle>]
 #                                                    [--status] [--dry-run] [--help]
-set -euo pipefail
+set -eu   # no pipefail: a "no match" mid-pipeline (grep, getent, ls) must not abort silently
 HS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; export HS_ROOT
 for l in common pkg detect bundles secrets layout docker menu; do . "$HS_ROOT/lib/$l.sh"; done
 

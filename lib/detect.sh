@@ -15,18 +15,18 @@ detect_all() {
   DET_VIRT=$(systemd-detect-virt 2>/dev/null) || true; DET_VIRT=${DET_VIRT:-none}
   [ "$DET_VIRT" = none ] && DET_IS_VM=0 || DET_IS_VM=1
   [ -d /dev/dri ] && ls /dev/dri/renderD* >/dev/null 2>&1 && DET_GPU=1 || DET_GPU=0
-  DET_ZIGBEE=$(ls /dev/serial/by-id/ 2>/dev/null | grep -iE 'zigbee|sonoff|conbee|skyconnect|slzb|cc2652|efr32|zbt' | head -1)
+  DET_ZIGBEE=$( { ls /dev/serial/by-id/ 2>/dev/null || true; } | { grep -iE 'zigbee|sonoff|conbee|skyconnect|slzb|cc2652|efr32|zbt' || true; } | head -1)
   [ -n "$DET_ZIGBEE" ] && DET_ZIGBEE="/dev/serial/by-id/$DET_ZIGBEE"
   command -v docker >/dev/null 2>&1 && DET_DOCKER=1 || DET_DOCKER=0
   DET_TZ=$(timedatectl show -p Timezone --value 2>/dev/null || cat /etc/timezone 2>/dev/null || echo UTC)
   DET_USER="${SUDO_USER:-$(logname 2>/dev/null || echo root)}"
   DET_UID=$(id -u "$DET_USER" 2>/dev/null || echo 1000)
-  DET_HOST_IP=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')
+  DET_HOST_IP=$( { ip -4 route get 1.1.1.1 2>/dev/null || true; } | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')
 }
 
 # Mounted filesystems with free space (real disks only): "mountpoint free_gb size_gb"
 detect_disks() {
-  df -BG --output=target,avail,size,fstype -x tmpfs -x devtmpfs -x squashfs -x overlay -x efivarfs 2>/dev/null \
+  { df -BG --output=target,avail,size,fstype -x tmpfs -x devtmpfs -x squashfs -x overlay -x efivarfs 2>/dev/null || true; } \
     | awk 'NR>1 && $1!~/^\/(boot|snap)/ {gsub("G","",$2); gsub("G","",$3); print $1, $2, $3}'
 }
 

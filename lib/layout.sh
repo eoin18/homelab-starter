@@ -3,7 +3,7 @@
 
 layout_create() {  # layout_create <bundle...>
   step "Folders and permissions"
-  local g; g=$(getent group "$PGID" | cut -d: -f1)
+  local g; g=$( { getent group "$PGID" || true; } | cut -d: -f1)
   if [ -z "$g" ]; then
     if getent group media >/dev/null; then die "group 'media' exists with a different id than PGID=$PGID"; fi
     run groupadd -g "$PGID" media && g=media
