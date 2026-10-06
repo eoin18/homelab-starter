@@ -68,7 +68,7 @@ TZ="Europe/Dublin"              # detected
 PUID=1000; PGID=1001            # admin user + 'media' group (created)
 APPDATA="/srv/appdata"
 DATA="/data"                    # per-type overrides: DATA_MOVIES, DATA_TV, DATA_BOOKS, DATA_ROMS
-ADMIN_USER="admin"              # one admin login used across apps (see open question)
+ADMIN_USER="admin"              # shared admin login used by every app
 GPU="auto"                      # auto | none
 ZIGBEE_DEVICE="auto"            # auto | none | /dev/serial/by-id/... | tcp://host:port
 REMOTE="none"                   # none | tailscale | cloudflare
@@ -130,4 +130,4 @@ Debian 12 (x86); Raspberry Pi OS arm64 on real hardware.
 - Games bundle: RomM only — neither gamarr nor romarr in v1.
 - Default paths: `/data` + `/srv/appdata`.
 - Remote: default none; Tailscale recommended, Cloudflare advanced.
-- **Still open:** shared admin login across apps vs separate generated password per app.
+- Admin logins: one shared admin username + password across all apps (chosen or generated in the menus; in CREDENTIALS.txt).
