@@ -1,0 +1,10 @@
+    - Sonarr:
+        icon: sonarr.png
+        href: http://${HOST_IP}:8989
+        description: TV
+        container: sonarr
+        widget:
+          type: sonarr
+          url: http://host.docker.internal:8989
+          key: ${SONARR_API_KEY}
+          enableQueue: true

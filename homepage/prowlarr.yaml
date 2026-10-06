@@ -1,0 +1,9 @@
+    - Prowlarr:
+        icon: prowlarr.png
+        href: http://${HOST_IP}:9696
+        description: Indexers (add your own sources)
+        container: prowlarr
+        widget:
+          type: prowlarr
+          url: http://host.docker.internal:9696
+          key: ${PROWLARR_API_KEY}

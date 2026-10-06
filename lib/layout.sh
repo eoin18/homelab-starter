@@ -10,10 +10,10 @@ layout_create() {  # layout_create <bundle...>
   fi
   run usermod -aG "$g" "$ADMIN_SYSUSER"
   local dirs=("$APPDATA")
-  in_list movies-tv "$@" && dirs+=("${DATA_MOVIES:-$DATA/movies}"/{library,downloads} "${DATA_TV:-$DATA/tv}"/{library,downloads})
-  in_list media-server "$@" && dirs+=("${DATA_MOVIES:-$DATA/movies}/library" "${DATA_TV:-$DATA/tv}/library")
-  in_list books "$@" && dirs+=("${DATA_BOOKS:-$DATA/books}"/{library,ingest,downloads})
-  in_list games "$@" && dirs+=("${DATA_ROMS:-$DATA/roms}"/library/{roms,bios})
+  in_list movies-tv "$@" && dirs+=("$DATA_MOVIES"/{library,downloads} "$DATA_TV"/{library,downloads})
+  in_list media-server "$@" && dirs+=("$DATA_MOVIES/library" "$DATA_TV/library")
+  in_list books "$@" && dirs+=("$DATA_BOOKS"/{library,ingest,downloads})
+  in_list games "$@" && dirs+=("$DATA_ROMS"/library/{roms,bios})
   local d
   for d in $(printf '%s\n' "${dirs[@]}" | awk '!s[$0]++'); do
     [ -d "$d" ] || run mkdir -p "$d"

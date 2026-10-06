@@ -1,0 +1,10 @@
+    - qBittorrent:
+        icon: qbittorrent.png
+        href: http://${HOST_IP}:8085
+        description: Downloads
+        container: qbittorrent
+        widget:
+          type: qbittorrent
+          url: http://host.docker.internal:8085
+          username: ${ADMIN_USER}
+          password: ${ADMIN_PASSWORD}

@@ -1,0 +1,9 @@
+    - Seerr:
+        icon: jellyseerr.png
+        href: http://${HOST_IP}:5055
+        description: Request movies and shows
+        container: seerr
+        widget:
+          type: jellyseerr
+          url: http://host.docker.internal:5055
+          key: ${SEERR_API_KEY}

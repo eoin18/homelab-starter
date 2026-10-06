@@ -1,0 +1,10 @@
+    - Radarr:
+        icon: radarr.png
+        href: http://${HOST_IP}:7878
+        description: Movies
+        container: radarr
+        widget:
+          type: radarr
+          url: http://host.docker.internal:7878
+          key: ${RADARR_API_KEY}
+          enableQueue: true

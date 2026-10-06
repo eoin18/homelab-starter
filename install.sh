@@ -39,6 +39,7 @@ if [ ${#ADD[@]} -gt 0 ] || [ ${#REMOVE[@]} -gt 0 ]; then BUNDLES=$(echo $BUNDLES
 : "${GPU:=auto}"; : "${REMOTE:=none}"
 [ "$GPU" = auto ] && { [ "$DET_GPU" = 1 ] && GPU=yes || GPU=none; }
 HOST_IP="${HOST_IP:-$DET_HOST_IP}"
+DATA_MOVIES="${DATA_MOVIES:-$DATA/movies}"; DATA_TV="${DATA_TV:-$DATA/tv}"; DATA_BOOKS="${DATA_BOOKS:-$DATA/books}"; DATA_ROMS="${DATA_ROMS:-$DATA/roms}"
 export BUNDLES DATA APPDATA TZ ADMIN_USER PUID PGID GPU REMOTE HOST_IP DATA_MOVIES DATA_TV DATA_BOOKS DATA_ROMS ZIGBEE_DEVICE TS_AUTHKEY CF_DOMAIN CF_TUNNEL_TOKEN CF_API_TOKEN BACKUP_TARGET 2>/dev/null || true
 
 mapfile -t RESOLVED < <(bundles_resolve $BUNDLES)
@@ -57,7 +58,7 @@ info "RAM estimate ~${ram} MB of ${DET_RAM_MB} MB"
 [ "$ram" -gt "$DET_RAM_MB" ] && warn "the chosen bundles may need more RAM than this machine has"
 
 # ---------- system ----------
-step "Packages"; pkg_install curl git envsubst; ok "curl, git, envsubst"
+step "Packages"; pkg_install curl git envsubst python3; ok "curl, git, envsubst, python3"
 docker_ensure
 layout_create "${RESOLVED[@]}"
 
@@ -66,6 +67,9 @@ step "Secrets"
 [ "$HS_DRY_RUN" = 1 ] || mkdir -p "$APPDATA"
 if [ -n "${ADMIN_PASSWORD:-}" ] && [ "$HS_DRY_RUN" != 1 ]; then env_set "$(secrets_file)" ADMIN_PASSWORD "$ADMIN_PASSWORD"; fi
 secret_ensure ADMIN_PASSWORD 20
+for s in "${SERVICES[@]}"; do   # API keys the *arr apps are started with, so wiring never has to scrape them
+  case "$s" in radarr|sonarr|prowlarr|bazarr) secret_ensure "$(echo "$s" | tr a-z A-Z)_API_KEY" 32 hex ;; esac
+done
 env_load "$(secrets_file)"; set -a; env_load "$(secrets_file)"; set +a
 ok "secrets in $(secrets_file)"
 
@@ -82,11 +86,13 @@ for s in "${SERVICES[@]}"; do [ -n "$(service_script "$s")" ] || pending+=("$s")
 
 # ---------- wiring ----------
 step "Wiring apps together"
+export HS_SERVICES="${SERVICES[*]}" PYTHONPATH="$HS_ROOT/lib"
 for s in "${SERVICES[@]}"; do
-  w="$HS_ROOT/wire/$s.sh"; [ -f "$w" ] || continue
+  if [ -f "$HS_ROOT/wire/$s.py" ]; then w=(python3 "$HS_ROOT/wire/$s.py"); elif [ -f "$HS_ROOT/wire/$s.sh" ]; then w=(bash "$HS_ROOT/wire/$s.sh"); else continue; fi
   if [ "$HS_DRY_RUN" = 1 ]; then info "[dry-run] would wire $s"; continue; fi
-  if bash "$w"; then ok "$s"; else warn "wiring $s failed — re-run install.sh to retry"; fi
+  if "${w[@]}"; then ok "$s"; else warn "wiring $s failed — re-run install.sh to retry"; fi
 done
+set -a; env_load "$(secrets_file)"; set +a   # keys created during wiring (Jellyfin, Seerr) for the dashboard
 
 # ---------- dashboard + summary ----------
 . "$HS_ROOT/lib/finish.sh"
