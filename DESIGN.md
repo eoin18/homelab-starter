@@ -26,7 +26,7 @@ curl -fsSL https://raw.githubusercontent.com/<you>/homelab-starter/main/get.sh |
 | `subtitles` | bazarr | movies-tv | add-on |
 | `media-cleanup` | maintainerr | movies-tv | add-on |
 | `books` | calibre-web-automated, shelfmark | core (+ downloads for torrent sources) | |
-| `games` | romm, romm-db, gamarr | core, downloads | gamarr vs romarr: pick one for v1 |
+| `games` | romm, romm-db | core | library manager only; no ROM downloader in v1 (gamarr/romarr too unreliable) |
 | `smart-home` | homeassistant, mosquitto | core | |
 | `zigbee` | zigbee2mqtt | smart-home | needs USB dongle or network coordinator |
 | `cameras` | scrypted | smart-home | |
@@ -107,7 +107,7 @@ preflight → install packages/Docker → create layout → generate secrets →
   KnownProxies set.
 - Seerr: initialised against Jellyfin + Radarr/Sonarr. Bazarr: Radarr/Sonarr + same-path mapping. Maintainerr: Jellyfin/Seerr/arrs.
 - Books: CWA library + ingest; Shelfmark → CWA ingest, Prowlarr, qBittorrent `books`.
-- Games: RomM + MariaDB (generated passwords), gamarr → Prowlarr/qBittorrent/RomM paths; nightly DB dump cron.
+- Games: RomM + MariaDB (generated passwords), library folder, nightly DB dump cron.
 - Smart home: Home Assistant onboarding left to the user (needs their location/account), Mosquitto user created,
   Zigbee2MQTT → Mosquitto; HA MQTT integration pre-filled where possible.
 - Homepage: tile + widget for every installed service with keys filled in.
@@ -125,10 +125,9 @@ preflight → install packages/Docker → create layout → generate secrets →
 asserts every service healthy + wiring checks (e.g. Radarr sees qBittorrent and Prowlarr). Matrix: Ubuntu 24.04,
 Debian 12 (x86); Raspberry Pi OS arm64 on real hardware.
 
-## 9. Open questions
-1. **Repo/project name** (`homelab-starter`?) and licence (MIT?).
-2. **Admin login model:** one shared admin username/password across apps (simple), or separate generated
-   per-app passwords (more secure, all listed in CREDENTIALS.txt)?
-3. **Games bundle:** ship gamarr, romarr, or neither in v1?
-4. **Default paths:** `/data` + `/srv/appdata` (as homelab) — OK?
-5. **Defaults for remote:** `none`, with Tailscale offered as the recommended option?
+## 9. Decisions (2026-10-06)
+- Name/licence: `homelab-starter`, MIT.
+- Games bundle: RomM only — neither gamarr nor romarr in v1.
+- Default paths: `/data` + `/srv/appdata`.
+- Remote: default none; Tailscale recommended, Cloudflare advanced.
+- **Still open:** shared admin login across apps vs separate generated password per app.
