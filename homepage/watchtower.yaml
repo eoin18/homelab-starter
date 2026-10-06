@@ -1,0 +1,7 @@
+    - Watchtower:
+        icon: watchtower.png
+        description: Updates containers nightly at 04:00
+        container: watchtower
+        widget:
+          type: docker
+          container: watchtower
