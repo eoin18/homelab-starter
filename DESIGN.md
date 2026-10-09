@@ -143,7 +143,10 @@ Debian 12 (x86); Raspberry Pi OS arm64 on real hardware.
   new bundles music (Lidarr, Navidrome, MusicGrabber, Aurral), photos (Immich+ML+Postgres+Valkey), documents (Paperless +
   Tika 3.x pinned + Gotenberg), passwords (Vaultwarden), admin (Termix, Dockhand, Dozzle, Uptime Kuma).
 - **Private repo integration:** the private homelab repo pins this repo as a git submodule (a rebuild uses the tested
-  commit); its up.sh/bootstrap call the starter with its profile; nightly sync **alerts on drift** (ntfy) instead of
-  rewriting service scripts. Personal services (gamarr, romarr, ROM pipeline) stay as profile extras.
+  commit); its up.sh/bootstrap call the starter with its profile; nightly sync **auto-syncs** live → profile: config diffs on catalogue
+  services become `overrides/<svc>` (secrets as ${VAR}), unknown containers become `extras/<name>.sh` (marked unreviewed), removed
+  ones are disabled, redundant overrides are pruned; leak scan → commit/push → ntfy summary. Alerts only for diffs that can't be
+  expressed as an override. Image digests (Dockhand updates) are ignored. Bumping the starter submodule renders + recreates first,
+  so the sync never captures stale live config as overrides that undo catalogue improvements. Personal services (gamarr, romarr, ROM pipeline) stay as profile extras.
 - **Build order:** catalogue refresh → profile/overrides/extras/render → author profile until zero drift → switch the private
   repo over (retire its services/) → VM restore drill via the new path (also completes the private repo's Phase F) → tag release.
