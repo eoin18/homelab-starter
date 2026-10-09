@@ -131,3 +131,19 @@ Debian 12 (x86); Raspberry Pi OS arm64 on real hardware.
 - Default paths: `/data` + `/srv/appdata`.
 - Remote: default none; Tailscale recommended, Cloudflare advanced.
 - Admin logins: one shared admin username + password across all apps (chosen or generated in the menus; in CREDENTIALS.txt).
+
+## Profiles (decided 2026-10-09) — the starter is also the author's own rebuild engine
+- **Bundles stay the user-facing themes.** The menus write `config.env`; a **profile** is the same thing saved ahead of
+  time and run non-interactively: `install.sh --profile <dir>` reads `<dir>/profile.env` (BUNDLES + values),
+  `<dir>/overrides/<service>.env|.flags` (extra -e/-v/--label, pinned image tags) and `<dir>/extras/*.sh` (private services
+  that are not in the public catalogue). No personal data ever lands in this repo.
+- **`install.sh --render --profile <dir>`** prints the exact `docker run` commands without running anything. Acceptance
+  test for the author's server: rendered commands == live containers (semantic compare, zero drift).
+- **Catalogue refresh:** Portainer/Netdata/Watchtower → Dockhand (+ its auto-update), Beszel(+agent), Dozzle, Uptime Kuma, ntfy;
+  new bundles music (Lidarr, Navidrome, MusicGrabber, Aurral), photos (Immich+ML+Postgres+Valkey), documents (Paperless +
+  Tika 3.x pinned + Gotenberg), passwords (Vaultwarden), admin (Termix, Dockhand, Dozzle, Uptime Kuma).
+- **Private repo integration:** the private homelab repo pins this repo as a git submodule (a rebuild uses the tested
+  commit); its up.sh/bootstrap call the starter with its profile; nightly sync **alerts on drift** (ntfy) instead of
+  rewriting service scripts. Personal services (gamarr, romarr, ROM pipeline) stay as profile extras.
+- **Build order:** catalogue refresh → profile/overrides/extras/render → author profile until zero drift → switch the private
+  repo over (retire its services/) → VM restore drill via the new path (also completes the private repo's Phase F) → tag release.
