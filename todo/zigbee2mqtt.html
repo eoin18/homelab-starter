@@ -1,0 +1,2 @@
+Pair your Zigbee devices
+Open <a href="http://HOST:8099">Zigbee2MQTT</a> (token = admin password), click <b>Permit join</b>, then reset/pair each device. They appear in Home Assistant automatically. If the coordinator isn't found, check <code>serial.port</code> (and <code>adapter</code> for network coordinators) in <code>APPDATA/zigbee2mqtt/configuration.yaml</code> and restart the container.

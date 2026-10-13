@@ -1,0 +1,5 @@
+    - Zigbee2MQTT:
+        icon: zigbee2mqtt.png
+        href: http://${HOST_IP}:8099
+        description: Zigbee devices
+        container: zigbee2mqtt

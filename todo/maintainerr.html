@@ -1,0 +1,2 @@
+Connect Maintainerr to Jellyfin
+Open <a href="http://HOST:6246">Maintainerr</a> &rarr; Settings: choose <b>Jellyfin</b> (<code>http://host.docker.internal:8096</code>, API key from Jellyfin &rarr; Dashboard &rarr; API keys), then add Radarr (<code>http://host.docker.internal:7878</code>) and Sonarr (<code>:8989</code>) with the API keys from their Settings &rarr; General. Then create a rule, e.g. "watched and older than 60 days". Rules only <i>collect</i> media until you set a delete delay, so nothing is removed without warning.

@@ -1,0 +1,5 @@
+    - Maintainerr:
+        icon: maintainerr.png
+        href: http://${HOST_IP}:6246
+        description: Library clean-up rules
+        container: maintainerr

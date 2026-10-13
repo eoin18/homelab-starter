@@ -1,0 +1,5 @@
+    - Home Assistant:
+        icon: home-assistant.png
+        href: http://${HOST_IP}:8123
+        description: Smart home
+        container: homeassistant

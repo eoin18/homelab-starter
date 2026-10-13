@@ -1,0 +1,5 @@
+    - Scrypted:
+        icon: scrypted.png
+        href: https://${HOST_IP}:10443
+        description: Cameras
+        container: scrypted

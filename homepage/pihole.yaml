@@ -1,0 +1,5 @@
+    - Pi-hole:
+        icon: pi-hole.png
+        href: http://${HOST_IP}:8053/admin
+        description: DNS ad blocking
+        container: pihole

@@ -1,0 +1,5 @@
+    - RomM:
+        icon: romm.png
+        href: http://${HOST_IP}:8090
+        description: Games library
+        container: romm

@@ -1,0 +1,5 @@
+    - Duplicati:
+        icon: duplicati.png
+        href: http://${HOST_IP}:8200
+        description: Backups
+        container: duplicati

@@ -1,0 +1,5 @@
+    - Bazarr:
+        icon: bazarr.png
+        href: http://${HOST_IP}:6767
+        description: Subtitles
+        container: bazarr

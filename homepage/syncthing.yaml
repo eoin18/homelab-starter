@@ -1,0 +1,5 @@
+    - Syncthing:
+        icon: syncthing.png
+        href: http://${HOST_IP}:8384
+        description: File sync
+        container: syncthing

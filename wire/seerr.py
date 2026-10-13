@@ -6,11 +6,18 @@ pub = req('GET', f'{B}/settings/public')[1] or {}
 c, r = req('POST', f'{B}/auth/jellyfin', {'username': E['ADMIN_USER'], 'password': E['ADMIN_PASSWORD'],
            'hostname': 'host.docker.internal', 'port': 8096, 'useSsl': False, 'urlBase': '',
            'email': f"{E['ADMIN_USER']}@homelab.local", 'serverType': 2})
+if c >= 300:   # server already configured (re-run): plain sign-in
+    c, r = req('POST', f'{B}/auth/jellyfin', {'username': E['ADMIN_USER'], 'password': E['ADMIN_PASSWORD']})
 if c >= 300: die(f'Seerr sign-in via Jellyfin failed: HTTP {c} {r}')
 if not pub.get('initialized'):
-    libs = req('GET', f'{B}/settings/jellyfin/library?sync=true')[1] or []
-    ids = ','.join(l['id'] for l in libs)
-    if ids: req('GET', f'{B}/settings/jellyfin/library?enable={ids}'); note(f'Jellyfin libraries: {", ".join(l["name"] for l in libs)}')
+    c, libs = req('GET', f'{B}/settings/jellyfin/library?sync=true')
+    if c == 400:   # newer Seerr: explicit sync, then enable each library
+        c, libs = req('POST', f'{B}/settings/jellyfin/library/sync')
+        if c >= 300 or not isinstance(libs, list): libs = req('GET', f'{B}/settings/jellyfin/library')[1]
+        for l in libs or []: req('PUT', f"{B}/settings/jellyfin/library/{l['id']}", {'enabled': True})
+    elif libs:
+        req('GET', f"{B}/settings/jellyfin/library?enable={','.join(l['id'] for l in libs)}")
+    if libs: note(f'Jellyfin libraries: {", ".join(l["name"] for l in libs)}')
 
 def add_arr(kind, port, key_env, folder, extra):
     existing = req('GET', f'{B}/settings/{kind}')[1] or []
@@ -28,7 +35,7 @@ def add_arr(kind, port, key_env, folder, extra):
 if installed('radarr'): add_arr('radarr', 7878, 'RADARR_API_KEY', E['DATA_MOVIES'] + '/library', {'minimumAvailability': 'released'})
 if installed('sonarr'): add_arr('sonarr', 8989, 'SONARR_API_KEY', E['DATA_TV'] + '/library',
                                 {'seriesType': 'standard', 'animeSeriesType': 'anime', 'enableSeasonFolders': True,
-                                 'activeAnimeProfileId': None, 'activeAnimeDirectory': None, 'activeLanguageProfileId': None})
+                                 'activeAnimeProfileId': None, 'activeAnimeDirectory': None})
 if not pub.get('initialized'):
     req('POST', f'{B}/settings/initialize'); note('setup completed')
 if not E.get('SEERR_API_KEY'):

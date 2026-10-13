@@ -25,7 +25,7 @@ YAML
     [ -n "${groups[$g]:-}" ] || order+=("$g")
     groups[$g]+="$(HOST_IP="$HOST_IP" envsubst < "$frag")"$'\n'
   done
-  { if [ -n "$(ls "$(todo_dir)" 2>/dev/null; for t in "$@"; do [ -f "$HS_ROOT/todo/$t.html" ] && echo x; done)" ]; then
+  { if [ -n "$(todo_installed "$@"; for t in "$@"; do [ -f "$HS_ROOT/todo/$t.html" ] && echo x; done)" ]; then
       printf -- '- Finish setup:\n    - Remaining steps:\n        icon: mdi-clipboard-check-outline\n        href: http://%s:3003/\n        description: A few things the installer could not do for you\n' "$HOST_IP"; fi
     for g in "${order[@]}"; do echo "- $g:"; printf '%s' "${groups[$g]}"; done; } > "$cfg/services.yaml"
   chown -R "$PUID:$PGID" "$APPDATA/homepage"
@@ -41,6 +41,7 @@ summary_write() {
     name=$(svc_meta "$s" name); url=$(svc_meta "$s" url)
     [ -n "$url" ] && lines+=("  $(printf '%-22s' "${name:-$s}") ${url//HOST/$HOST_IP}")
   done
+  [ -n "${BACKUP_PASSPHRASE:-}" ] && lines+=("" "Backup passphrase (Duplicati — keep a copy elsewhere, restores need it):" "  $BACKUP_PASSPHRASE")
   lines+=("" "Settings: $HS_CONFIG   Secrets: $(secrets_file)" "Re-run: sudo $HS_ROOT/install.sh   (--reconfigure, --add <bundle>, --status)")
   if [ "$HS_DRY_RUN" != 1 ]; then printf '%s\n' "${lines[@]}" > "$f"; chmod 600 "$f"; fi
   printf '    %s\n' "${lines[@]}"
@@ -49,13 +50,22 @@ summary_write() {
 
 # next_steps_render <services...>: HTML page of manual steps (static todo/<svc>.html + todo_add entries) and app links,
 # served by Homepage at http://HOST:3000/images/finish-setup.html. Ticks are remembered in the browser.
+# dynamic steps (todo_add <service>[-suffix]) of services that are still installed
+todo_installed() {
+  local f k s
+  for f in "$(todo_dir)"/*.html; do
+    [ -f "$f" ] || continue; k=$(basename "$f" .html)
+    for s in "$@"; do case "$k" in "$s"|"$s"-*) echo "$f"; break ;; esac; done
+  done
+}
+
 next_steps_render() {
   in_list welcome "$@" || return 0
   local out="$APPDATA/welcome/index.html" s f items="" apps="" n=0 name url
   [ "$HS_DRY_RUN" = 1 ] && { info "[dry-run] would write $out"; return; }
   mkdir -p "$(dirname "$out")"
-  for f in $(for s in "$@"; do [ -f "$HS_ROOT/todo/$s.html" ] && echo "$HS_ROOT/todo/$s.html"; done) $(ls "$(todo_dir)"/*.html 2>/dev/null); do
-    n=$((n+1)); items+="<li><label><input type=checkbox data-k=\"$(basename "$f" .html)\"> <b>$(head -1 "$f")</b></label><p>$(tail -n +2 "$f" | sed "s/HOST/$HOST_IP/g")</p></li>"
+  for f in $(for s in "$@"; do [ -f "$HS_ROOT/todo/$s.html" ] && echo "$HS_ROOT/todo/$s.html"; done) $(todo_installed "$@"); do
+    n=$((n+1)); items+="<li><label><input type=checkbox data-k=\"$(basename "$f" .html)\"> <b>$(head -1 "$f")</b></label><p>$(tail -n +2 "$f" | sed -e "s/HOST/$HOST_IP/g" -e "s|APPDATA|$APPDATA|g" -e "s|DATA_ROMS|${DATA_ROMS:-}|g" -e "s|\bDATA/|$DATA/|g")</p></li>"
   done
   for s in "$@"; do name=$(svc_meta "$s" name); url=$(svc_meta "$s" url); [ -n "$url" ] && apps+="<li><a href=\"${url/HOST/$HOST_IP}\">$name</a></li>"; done
   cat > "$out" <<HTML

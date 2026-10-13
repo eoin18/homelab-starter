@@ -1,0 +1,5 @@
+    - Shelfmark:
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/shelfmark.png
+        href: http://${HOST_IP}:8084
+        description: Find and request books
+        container: shelfmark
