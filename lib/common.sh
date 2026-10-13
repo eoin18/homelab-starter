@@ -47,3 +47,9 @@ marker_set() { mkdir -p "$(marker_dir)"; date -Is > "$(marker_dir)/$1.done"; }
 
 # Word-list helpers
 in_list() { local x="$1"; shift; for y in "$@"; do [ "$x" = "$y" ] && return 0; done; return 1; }
+
+# ---------- "Finish setup" page: manual steps the installer could not do itself ----------
+# todo_add <id> <title> <html body>   (wire scripts call this when an automatic step fails or needs a human)
+todo_dir() { echo "$(marker_dir)/todo"; }
+todo_add() { [ "${HS_DRY_RUN:-0}" = 1 ] && return 0; mkdir -p "$(todo_dir)"; { echo "$2"; echo "$3"; } > "$(todo_dir)/$1.html"; }
+todo_clear() { rm -f "$(todo_dir)/$1.html"; }

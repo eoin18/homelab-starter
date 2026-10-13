@@ -6,6 +6,7 @@
 # Open on the home network / tailnet only (no auth); add auth in server.yml before exposing it to the internet.
 source "$HS_ROOT/lib/service.sh"
 write_once "$APPDATA/ntfy/config/server.yml" <<YML
+base-url: "http://${HOST_IP}:8086"
 listen-http: ":80"
 cache-file: "/var/cache/ntfy/cache.db"
 cache-duration: "72h"

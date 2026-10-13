@@ -98,4 +98,5 @@ set -a; env_load "$(secrets_file)"; set +a   # keys created during wiring (Jelly
 # ---------- dashboard + summary ----------
 . "$HS_ROOT/lib/finish.sh"
 homepage_render "${SERVICES[@]}"
+next_steps_render "${SERVICES[@]}"
 summary_write "${SERVICES[@]}"
