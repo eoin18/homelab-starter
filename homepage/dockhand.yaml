@@ -1,0 +1,5 @@
+    - Dockhand:
+        icon: dockhand.png
+        href: http://${HOST_IP}:3010
+        description: Containers and automatic updates
+        container: dockhand

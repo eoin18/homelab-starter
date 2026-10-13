@@ -69,6 +69,7 @@ if [ -n "${ADMIN_PASSWORD:-}" ] && [ "$HS_DRY_RUN" != 1 ]; then env_set "$(secre
 secret_ensure ADMIN_PASSWORD 20
 for s in "${SERVICES[@]}"; do   # API keys the *arr apps are started with, so wiring never has to scrape them
   case "$s" in radarr|sonarr|prowlarr|bazarr) secret_ensure "$(echo "$s" | tr a-z A-Z)_API_KEY" 32 hex ;; esac
+  case "$s" in dockhand) secret_ensure DOCKHAND_ENCRYPTION_KEY 44 ;; speedtest-tracker) secret_ensure SPEEDTEST_KEY_SEED 32 ;; esac
 done
 env_load "$(secrets_file)"; set -a; env_load "$(secrets_file)"; set +a
 ok "secrets in $(secrets_file)"

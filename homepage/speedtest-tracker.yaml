@@ -1,0 +1,5 @@
+    - Speedtest:
+        icon: speedtest-tracker.png
+        href: http://${HOST_IP}:8080
+        description: Internet speed history
+        container: speedtest-tracker

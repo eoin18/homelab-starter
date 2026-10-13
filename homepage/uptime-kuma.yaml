@@ -1,0 +1,5 @@
+    - Uptime Kuma:
+        icon: uptime-kuma.png
+        href: http://${HOST_IP}:3002
+        description: Is everything up?
+        container: uptime-kuma

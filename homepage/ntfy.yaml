@@ -1,0 +1,5 @@
+    - ntfy:
+        icon: ntfy.png
+        href: http://${HOST_IP}:8086
+        description: Phone alerts (topic "homelab")
+        container: ntfy

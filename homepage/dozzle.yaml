@@ -1,0 +1,5 @@
+    - Dozzle:
+        icon: dozzle.png
+        href: http://${HOST_IP}:8092
+        description: Live container logs
+        container: dozzle

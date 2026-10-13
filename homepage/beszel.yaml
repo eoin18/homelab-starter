@@ -1,0 +1,5 @@
+    - Beszel:
+        icon: beszel.png
+        href: http://${HOST_IP}:8091
+        description: Server and container stats
+        container: beszel

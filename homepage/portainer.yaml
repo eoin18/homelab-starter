@@ -1,8 +1,0 @@
-    - Portainer:
-        icon: portainer.png
-        href: https://${HOST_IP}:9443
-        description: Containers
-        container: portainer
-        widget:
-          type: docker
-          container: portainer
