@@ -3,11 +3,12 @@
 #                                                    [--status] [--dry-run] [--help]
 #        sudo ./install.sh --profile <dir>     non-interactive install from a saved profile (see docs/profiles.md)
 #             ./install.sh --render --profile <dir>   print the exact docker run commands, change nothing
+#             ./install.sh [--profile <dir>] --only <name> [--only ...]   recreate just these containers
 set -eu   # no pipefail: a "no match" mid-pipeline (grep, getent, ls) must not abort silently
 HS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; export HS_ROOT
 for l in common pkg detect bundles secrets layout docker menu; do . "$HS_ROOT/lib/$l.sh"; done
 
-RECONF=0; ADD=(); REMOVE=(); STATUS=0; RENDER=0
+RECONF=0; ADD=(); REMOVE=(); STATUS=0; RENDER=0; ONLY=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --reconfigure) RECONF=1 ;;
@@ -17,7 +18,8 @@ while [ $# -gt 0 ]; do
     --dry-run) HS_DRY_RUN=1 ;;
     --profile) HS_PROFILE=$(cd "$2" && pwd) || die "no profile folder $2"; HS_CONFIG="$HS_PROFILE/profile.env"; shift ;;
     --render) RENDER=1; HS_DRY_RUN=1 ;;
-    -h|--help) sed -n '2,5p' "$0"; exit 0 ;;
+    --only) ONLY+=("$2"); shift ;;
+    -h|--help) sed -n '2,6p' "$0"; exit 0 ;;
     *) die "unknown option $1 (try --help)" ;;
   esac; shift
 done
@@ -25,7 +27,12 @@ export HS_DRY_RUN HS_PROFILE="${HS_PROFILE:-}" HS_CONFIG
 if [ -n "$HS_PROFILE" ]; then [ -f "$HS_CONFIG" ] || die "$HS_CONFIG missing"; fi
 [ "$RENDER" = 1 ] && exec 3>&1 1>&2   # --render: commands on stdout, everything else on stderr
 
-[ "$HS_DRY_RUN" = 1 ] || require_root
+if [ ${#ONLY[@]} -gt 0 ]; then   # recreating a few containers needs Docker access, not root
+  [ "$HS_DRY_RUN" = 1 ] || command docker info >/dev/null 2>&1 || die "no access to Docker (use sudo or join the docker group)"
+  [ "$(id -u)" -eq 0 ] || HS_SECRETS_RO=1; export HS_SECRETS_RO
+else
+  [ "$HS_DRY_RUN" = 1 ] || require_root
+fi
 detect_all
 case "$DET_ARCH" in amd64|arm64) ;; *) die "unsupported CPU architecture $DET_ARCH (x86_64 or arm64 needed)";; esac
 
@@ -55,8 +62,20 @@ if [ -n "${EXCLUDE:-}" ]; then   # profile: catalogue services this machine does
   mapfile -t SERVICES < <(printf '%s\n' "${SERVICES[@]}" | grep -vxF -f <(printf '%s\n' $EXCLUDE) || true)
 fi
 EXTRAS=(); [ -n "$HS_PROFILE" ] && [ -d "$HS_PROFILE/extras" ] && mapfile -t EXTRAS < <(ls "$HS_PROFILE"/extras/*.sh 2>/dev/null | sort)
-skipped() { in_list "$1" ${SKIP_STEPS:-}; }   # profile: installer steps to leave out (layout wiring dashboard)
+skipped() { in_list "$1" ${SKIP_STEPS:-}; }   # profile: installer steps to leave out (layout wiring dashboard summary)
 service_script() { ls "$HS_ROOT"/services/*-"$1".sh 2>/dev/null | head -1; }
+svc_name() { basename "$1" .sh | sed 's/^[0-9]*-//'; }
+# service scripts in start order (catalogue by number, then the profile's extras), limited by --only
+svc_files() {
+  local f
+  for f in $(for s in "${SERVICES[@]}"; do service_script "$s"; done | sort) "${EXTRAS[@]}"; do
+    [ ${#ONLY[@]} -eq 0 ] || in_list "$(svc_name "$f")" "${ONLY[@]}" && echo "$f"
+  done
+}
+for o in "${ONLY[@]}"; do
+  for f in $(for s in "${SERVICES[@]}"; do service_script "$s"; done) "${EXTRAS[@]}"; do [ "$(svc_name "$f")" = "$o" ] && continue 2; done
+  die "--only $o: not a service of this installation (bundles/EXCLUDE/extras)"
+done
 
 if [ "$STATUS" = 1 ]; then
   step "Status"; for s in "${SERVICES[@]}"; do printf '    %-24s %s\n' "$s" "$(docker inspect -f '{{.State.Status}}' "$s" 2>/dev/null || echo 'not installed')"; done; exit 0
@@ -70,7 +89,7 @@ info "RAM estimate ~${ram} MB of ${DET_RAM_MB} MB"
 [ "$ram" -gt "$DET_RAM_MB" ] && warn "the chosen bundles may need more RAM than this machine has"
 
 # ---------- system ----------
-if [ "$RENDER" != 1 ]; then
+if [ "$RENDER" != 1 ] && [ ${#ONLY[@]} -eq 0 ]; then
   step "Packages"; pkg_install curl git envsubst python3; ok "curl, git, envsubst, python3"
   docker_ensure
   skipped layout || layout_create "${RESOLVED[@]}"
@@ -78,8 +97,8 @@ fi
 
 # ---------- secrets ----------
 step "Secrets"
-[ "$HS_DRY_RUN" = 1 ] || mkdir -p "$APPDATA"
-if [ -n "${ADMIN_PASSWORD:-}" ] && [ "$HS_DRY_RUN" != 1 ]; then env_set "$(secrets_file)" ADMIN_PASSWORD "$ADMIN_PASSWORD"; fi
+[ "$HS_DRY_RUN" = 1 ] || [ "${HS_SECRETS_RO:-0}" = 1 ] || mkdir -p "$APPDATA"
+if [ -n "${ADMIN_PASSWORD:-}" ] && [ "$HS_DRY_RUN" != 1 ] && [ "${HS_SECRETS_RO:-0}" != 1 ]; then env_set "$(secrets_file)" ADMIN_PASSWORD "$ADMIN_PASSWORD"; fi
 secret_ensure ADMIN_PASSWORD 20
 for s in "${SERVICES[@]}"; do   # API keys the *arr apps are started with, so wiring never has to scrape them
   case "$s" in radarr|sonarr|prowlarr|bazarr|lidarr) secret_ensure "$(echo "$s" | tr a-z A-Z)_API_KEY" 32 hex ;; esac
@@ -93,18 +112,19 @@ ok "secrets in $(secrets_file)"
 
 # ---------- services (in script-number order, then the profile's extras) ----------
 if [ "$RENDER" = 1 ]; then
-  for f in $(for s in "${SERVICES[@]}"; do service_script "$s"; done | sort) "${EXTRAS[@]}"; do echo "# $f" >&3; HS_RENDER=1 bash "$f" >/dev/null || die "render failed: $f"; done
+  for f in $(svc_files); do echo "# $f" >&3; HS_RENDER=1 bash "$f" >/dev/null || die "render failed: $f"; done
   exit 0
 fi
 step "Services"
 docker network inspect homelab >/dev/null 2>&1 || run docker network create homelab >/dev/null
 pending=()
-for f in $(for s in "${SERVICES[@]}"; do service_script "$s"; done | sort) "${EXTRAS[@]}"; do
-  n=$(basename "$f" .sh); n=${n#*-}
+for f in $(svc_files); do
+  n=$(svc_name "$f")
   if bash "$f" >/dev/null; then ok "$n"; else warn "$n failed to start (see: docker logs $n)"; fi
 done
 for s in "${SERVICES[@]}"; do [ -n "$(service_script "$s")" ] || pending+=("$s"); done
 [ ${#pending[@]} -eq 0 ] || warn "not available in this version yet: ${pending[*]}"
+[ ${#ONLY[@]} -eq 0 ] || exit 0
 
 # ---------- wiring ----------
 skipped wiring && SERVICES_WIRE=() || SERVICES_WIRE=("${SERVICES[@]}")
@@ -120,4 +140,4 @@ set -a; env_load "$(secrets_file)"; set +a   # keys created during wiring (Jelly
 # ---------- dashboard + summary ----------
 . "$HS_ROOT/lib/finish.sh"
 skipped dashboard || { homepage_render "${SERVICES[@]}"; next_steps_render "${SERVICES[@]}"; }
-summary_write "${SERVICES[@]}"
+skipped summary || summary_write "${SERVICES[@]}"

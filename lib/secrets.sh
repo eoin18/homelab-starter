@@ -13,7 +13,7 @@ secret_ensure() {
   env_load "$f"
   if [ -z "${!var:-}" ]; then
     local v; [ "$kind" = hex ] && v=$(gen_hex "$len") || v=$(gen_secret "$len")
-    [ "$HS_DRY_RUN" = 1 ] || env_set "$f" "$var" "$v"
+    [ "$HS_DRY_RUN" = 1 ] || [ "${HS_SECRETS_RO:-0}" = 1 ] || env_set "$f" "$var" "$v"
     printf -v "$var" '%s' "$v"; export "${var?}"
   fi
 }

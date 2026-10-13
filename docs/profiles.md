@@ -7,7 +7,7 @@ myserver/
   profile.env            BUNDLES + the same settings the menus write (see config.env.example), plus:
                            SECRETS_ENV=/path/secrets.env   values that overrides reference as ${VAR}
                            EXCLUDE="welcome ..."           catalogue services this machine does not run
-                           SKIP_STEPS="layout wiring dashboard"   installer steps to leave out
+                           SKIP_STEPS="layout wiring dashboard summary"   installer steps to leave out
                            CAPTURE_IGNORE="..."            containers `capture` should not touch
   overrides/<name>.args  changes to one catalogue container (see below)
   extras/<name>.sh       containers that are not in the catalogue (same format as services/*.sh)
@@ -18,6 +18,7 @@ sudo ./install.sh --profile myserver            # install / recreate everything,
 ./install.sh --render --profile myserver        # print the exact docker run commands, change nothing
 tools/profile.py diff --profile myserver        # rendered commands vs the running containers
 tools/profile.py capture --profile myserver     # write overrides/extras so the profile matches what is running
+./install.sh --profile myserver --only radarr   # recreate just one container (Docker access, no sudo needed)
 ```
 
 ## Override files
