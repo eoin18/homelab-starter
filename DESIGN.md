@@ -135,7 +135,7 @@ Debian 12 (x86); Raspberry Pi OS arm64 on real hardware.
 ## Profiles (decided 2026-10-09) — the starter is also the author's own rebuild engine
 - **Bundles stay the user-facing themes.** The menus write `config.env`; a **profile** is the same thing saved ahead of
   time and run non-interactively: `install.sh --profile <dir>` reads `<dir>/profile.env` (BUNDLES + values),
-  `<dir>/overrides/<service>.env|.flags` (extra -e/-v/--label, pinned image tags) and `<dir>/extras/*.sh` (private services
+  `<dir>/overrides/<service>.args` (set/unset any docker run flag, image, cmd — see docs/profiles.md) and `<dir>/extras/*.sh` (private services
   that are not in the public catalogue). No personal data ever lands in this repo.
 - **`install.sh --render --profile <dir>`** prints the exact `docker run` commands without running anything. Acceptance
   test for the author's server: rendered commands == live containers (semantic compare, zero drift).

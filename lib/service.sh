@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 # Sourced by services/*.sh. Config + secrets are already exported by install.sh.
 set -eu   # no pipefail: a "no match" mid-pipeline (grep, getent, ls) must not abort silently
-if [ "${HS_DRY_RUN:-0}" = 1 ]; then
-  docker() { printf '    [dry-run] docker'; printf ' %q' "$@"; echo; }
+# `docker run` goes through lib/runspec.py, which applies the profile's overrides/<name>.args (if any).
+_hs_run_argv() { HS_RUN_ARGV=(); local x; while IFS= read -r -d '' x; do HS_RUN_ARGV+=("$x"); done < <(python3 "$HS_ROOT/lib/runspec.py" apply "$@"); }
+if [ "${HS_RENDER:-0}" = 1 ]; then      # --render: print only the final run commands (fd 3), touch nothing
+  docker() { [ "$1" = run ] || return 0; _hs_run_argv "$@"; { printf 'docker'; printf ' %q' "${HS_RUN_ARGV[@]}"; echo; } >&3; }
+  recreate() { :; }
+elif [ "${HS_DRY_RUN:-0}" = 1 ]; then
+  docker() { [ "$1" = run ] && { _hs_run_argv "$@"; set -- "${HS_RUN_ARGV[@]}"; }; printf '    [dry-run] docker'; printf ' %q' "$@"; echo; }
   recreate() { :; }
 else
-  recreate() { docker rm -f "$1" >/dev/null 2>&1 || true; }
+  docker() { if [ "$1" = run ] && [ -n "${HS_PROFILE:-}" ]; then _hs_run_argv "$@"; command docker "${HS_RUN_ARGV[@]}"; else command docker "$@"; fi; }
+  recreate() { command docker rm -f "$1" >/dev/null 2>&1 || true; }
 fi
 # Common flags every container gets
 HS_COMMON=(--restart unless-stopped --add-host=host.docker.internal:host-gateway -e TZ="$TZ")
@@ -19,7 +25,7 @@ done
 HS_IDS=(-e PUID="$PUID" -e PGID="$PGID" -e UMASK=002)
 
 # write_once <file> : stdin → file, only if it does not exist yet (pre-seeding config before first start)
-write_once() { [ -e "$1" ] && { cat >/dev/null; return 0; }; mkdir -p "$(dirname "$1")"; cat > "$1"; chown "$PUID:$PGID" "$(dirname "$1")" "$1"; }
+write_once() { [ "${HS_DRY_RUN:-0}" = 1 ] && { cat >/dev/null; return 0; }; [ -e "$1" ] && { cat >/dev/null; return 0; }; mkdir -p "$(dirname "$1")"; cat > "$1"; chown "$PUID:$PGID" "$(dirname "$1")" "$1"; }
 
 # arr_config <dir> <port> <api-key>: Servarr config.xml with a known API key
 arr_config() {

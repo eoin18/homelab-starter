@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # homelab-starter installer. Usage: sudo ./install.sh [--reconfigure] [--add <bundle>] [--remove <bundle>]
 #                                                    [--status] [--dry-run] [--help]
+#        sudo ./install.sh --profile <dir>     non-interactive install from a saved profile (see docs/profiles.md)
+#             ./install.sh --render --profile <dir>   print the exact docker run commands, change nothing
 set -eu   # no pipefail: a "no match" mid-pipeline (grep, getent, ls) must not abort silently
 HS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; export HS_ROOT
 for l in common pkg detect bundles secrets layout docker menu; do . "$HS_ROOT/lib/$l.sh"; done
 
-RECONF=0; ADD=(); REMOVE=(); STATUS=0
+RECONF=0; ADD=(); REMOVE=(); STATUS=0; RENDER=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --reconfigure) RECONF=1 ;;
@@ -13,11 +15,15 @@ while [ $# -gt 0 ]; do
     --remove) REMOVE+=("$2"); shift ;;
     --status) STATUS=1 ;;
     --dry-run) HS_DRY_RUN=1 ;;
-    -h|--help) sed -n '2,3p' "$0"; exit 0 ;;
+    --profile) HS_PROFILE=$(cd "$2" && pwd) || die "no profile folder $2"; HS_CONFIG="$HS_PROFILE/profile.env"; shift ;;
+    --render) RENDER=1; HS_DRY_RUN=1 ;;
+    -h|--help) sed -n '2,5p' "$0"; exit 0 ;;
     *) die "unknown option $1 (try --help)" ;;
   esac; shift
 done
-export HS_DRY_RUN
+export HS_DRY_RUN HS_PROFILE="${HS_PROFILE:-}" HS_CONFIG
+if [ -n "$HS_PROFILE" ]; then [ -f "$HS_CONFIG" ] || die "$HS_CONFIG missing"; fi
+[ "$RENDER" = 1 ] && exec 3>&1 1>&2   # --render: commands on stdout, everything else on stderr
 
 [ "$HS_DRY_RUN" = 1 ] || require_root
 detect_all
@@ -25,6 +31,7 @@ case "$DET_ARCH" in amd64|arm64) ;; *) die "unsupported CPU architecture $DET_AR
 
 # ---------- configuration ----------
 env_load "$HS_CONFIG"
+[ -n "${SECRETS_ENV:-}" ] && env_load "${SECRETS_ENV/#\~/$HOME}"   # profile: values its overrides reference
 ADMIN_SYSUSER="$DET_USER"; PUID="${PUID:-$DET_UID}"; PGID="${PGID:-1001}"
 if [ ! -f "$HS_CONFIG" ] || [ "$RECONF" = 1 ]; then
   [ -t 0 ] || die "no config.env and no terminal for the menus. Copy config.env.example to config.env, or run interactively."
@@ -44,6 +51,11 @@ export BUNDLES DATA APPDATA TZ ADMIN_USER PUID PGID GPU REMOTE HOST_IP DATA_MOVI
 
 mapfile -t RESOLVED < <(bundles_resolve $BUNDLES)
 mapfile -t SERVICES < <(bundles_services "${RESOLVED[@]}")
+if [ -n "${EXCLUDE:-}" ]; then   # profile: catalogue services this machine does not run
+  mapfile -t SERVICES < <(printf '%s\n' "${SERVICES[@]}" | grep -vxF -f <(printf '%s\n' $EXCLUDE) || true)
+fi
+EXTRAS=(); [ -n "$HS_PROFILE" ] && [ -d "$HS_PROFILE/extras" ] && mapfile -t EXTRAS < <(ls "$HS_PROFILE"/extras/*.sh 2>/dev/null | sort)
+skipped() { in_list "$1" ${SKIP_STEPS:-}; }   # profile: installer steps to leave out (layout wiring dashboard)
 service_script() { ls "$HS_ROOT"/services/*-"$1".sh 2>/dev/null | head -1; }
 
 if [ "$STATUS" = 1 ]; then
@@ -58,9 +70,11 @@ info "RAM estimate ~${ram} MB of ${DET_RAM_MB} MB"
 [ "$ram" -gt "$DET_RAM_MB" ] && warn "the chosen bundles may need more RAM than this machine has"
 
 # ---------- system ----------
-step "Packages"; pkg_install curl git envsubst python3; ok "curl, git, envsubst, python3"
-docker_ensure
-layout_create "${RESOLVED[@]}"
+if [ "$RENDER" != 1 ]; then
+  step "Packages"; pkg_install curl git envsubst python3; ok "curl, git, envsubst, python3"
+  docker_ensure
+  skipped layout || layout_create "${RESOLVED[@]}"
+fi
 
 # ---------- secrets ----------
 step "Secrets"
@@ -77,11 +91,15 @@ done
 env_load "$(secrets_file)"; set -a; env_load "$(secrets_file)"; set +a
 ok "secrets in $(secrets_file)"
 
-# ---------- services (in script-number order) ----------
+# ---------- services (in script-number order, then the profile's extras) ----------
+if [ "$RENDER" = 1 ]; then
+  for f in $(for s in "${SERVICES[@]}"; do service_script "$s"; done | sort) "${EXTRAS[@]}"; do echo "# $f" >&3; HS_RENDER=1 bash "$f" >/dev/null || die "render failed: $f"; done
+  exit 0
+fi
 step "Services"
 docker network inspect homelab >/dev/null 2>&1 || run docker network create homelab >/dev/null
 pending=()
-for f in $(for s in "${SERVICES[@]}"; do service_script "$s"; done | sort); do
+for f in $(for s in "${SERVICES[@]}"; do service_script "$s"; done | sort) "${EXTRAS[@]}"; do
   n=$(basename "$f" .sh); n=${n#*-}
   if bash "$f" >/dev/null; then ok "$n"; else warn "$n failed to start (see: docker logs $n)"; fi
 done
@@ -89,9 +107,10 @@ for s in "${SERVICES[@]}"; do [ -n "$(service_script "$s")" ] || pending+=("$s")
 [ ${#pending[@]} -eq 0 ] || warn "not available in this version yet: ${pending[*]}"
 
 # ---------- wiring ----------
+skipped wiring && SERVICES_WIRE=() || SERVICES_WIRE=("${SERVICES[@]}")
 step "Wiring apps together"
 export HS_SERVICES="${SERVICES[*]}" PYTHONPATH="$HS_ROOT/lib"
-for s in "${SERVICES[@]}"; do
+for s in "${SERVICES_WIRE[@]}"; do
   if [ -f "$HS_ROOT/wire/$s.py" ]; then w=(python3 "$HS_ROOT/wire/$s.py"); elif [ -f "$HS_ROOT/wire/$s.sh" ]; then w=(bash "$HS_ROOT/wire/$s.sh"); else continue; fi
   if [ "$HS_DRY_RUN" = 1 ]; then info "[dry-run] would wire $s"; continue; fi
   if "${w[@]}"; then ok "$s"; else warn "wiring $s failed — re-run install.sh to retry"; fi
@@ -100,6 +119,5 @@ set -a; env_load "$(secrets_file)"; set +a   # keys created during wiring (Jelly
 
 # ---------- dashboard + summary ----------
 . "$HS_ROOT/lib/finish.sh"
-homepage_render "${SERVICES[@]}"
-next_steps_render "${SERVICES[@]}"
+skipped dashboard || { homepage_render "${SERVICES[@]}"; next_steps_render "${SERVICES[@]}"; }
 summary_write "${SERVICES[@]}"

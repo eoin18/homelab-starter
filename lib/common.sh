@@ -27,7 +27,7 @@ env_set() {
   fi
   printf "%s='%s'\n" "$key" "$esc" >> "$file"
 }
-env_load() { [ -f "$1" ] && { set -a; . "$1"; set +a; }; return 0; }
+env_load() { [ -r "$1" ] && { set -a; . "$1"; set +a; }; return 0; }
 
 # wait_for_http <url> [timeout-seconds]: success once the URL answers with any HTTP status below 500
 wait_for_http() {

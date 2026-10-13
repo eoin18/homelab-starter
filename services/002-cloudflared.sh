@@ -6,4 +6,4 @@ source "$HS_ROOT/lib/service.sh"
 recreate cloudflared
 docker run -d --name cloudflared "${HS_COMMON[@]}" \
   --network host \
-  cloudflare/cloudflared:latest tunnel --no-autoupdate run --token "$CF_TUNNEL_TOKEN"
+  cloudflare/cloudflared:latest tunnel --no-autoupdate run --token "${CF_TUNNEL_TOKEN:-}"
