@@ -1,0 +1,5 @@
+    - Aurral:
+        icon: aurral.png
+        href: http://${HOST_IP}:3001
+        description: Music discovery
+        container: aurral

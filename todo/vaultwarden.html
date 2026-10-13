@@ -1,0 +1,2 @@
+Set up Vaultwarden (passwords)
+Bitwarden apps and the web vault only work over <b>HTTPS</b>, so Vaultwarden needs the <b>Tailscale</b> or <b>Cloudflare</b> remote option. With Tailscale, run <code>sudo tailscale serve --bg --https=8443 http://localhost:8094</code> and open the https link it prints. Create your account there (invite yourself first from <code>/admin</code> with the admin password), turn on two-step login, then point the Bitwarden app and browser extension at that address (choose "self-hosted").

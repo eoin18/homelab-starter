@@ -1,0 +1,5 @@
+    - Paperless:
+        icon: paperless-ngx.png
+        href: http://${HOST_IP}:8095
+        description: Documents
+        container: paperless

@@ -1,5 +1,5 @@
 """Tiny HTTP/JSON helper for wire/*.py (stdlib only)."""
-import http.cookiejar, json, os, ssl, sys, time, urllib.error, urllib.parse, urllib.request
+import http.cookiejar, json, os, socket, ssl, sys, time, urllib.error, urllib.parse, urllib.request
 
 E = os.environ
 _ctx = ssl._create_unverified_context()
@@ -61,6 +61,10 @@ class Arr:
         if hc.get('authenticationMethod') == 'forms' and hc.get('username') == user: return
         hc.update({'authenticationMethod': 'forms', 'authenticationRequired': 'disabledForLocalAddresses',
                    'username': user, 'password': password, 'passwordConfirmation': password})
+        if 'allowedHosts' in hc:   # newer *arrs require this with disabledForLocalAddresses: every name the other apps/you use
+            hosts = ['localhost', '127.0.0.1', 'host.docker.internal', E.get('HOST_IP', ''), socket.gethostname()]
+            if E.get('CF_DOMAIN'): hosts.append('*.' + E['CF_DOMAIN'])
+            hc['allowedHosts'] = ','.join(h for h in dict.fromkeys(hosts) if h)
         self.put(f"/config/host/{hc.get('id', 1)}", hc)
     def from_schema(self, kind, implementation, name, fields, **extra):
         """Create a download client / app / proxy from its schema unless one with this name exists."""
@@ -70,3 +74,10 @@ class Arr:
             if f['name'] in fields: f['value'] = fields[f['name']]
         s.update({'name': name, **extra}); s.setdefault('enable', True)
         self.post(f'/{kind}', s); return True
+def todo_add(key, title, body_html):
+    """Add a step to the installer's Finish-setup page (same format as lib/common.sh todo_add)."""
+    d = os.path.join(E['APPDATA'], '.homelab-starter', 'todo'); os.makedirs(d, exist_ok=True)
+    with open(os.path.join(d, key + '.html'), 'w') as fh: fh.write(title + '\n' + body_html + '\n')
+def todo_clear(key):
+    try: os.remove(os.path.join(E['APPDATA'], '.homelab-starter', 'todo', key + '.html'))
+    except FileNotFoundError: pass

@@ -1,0 +1,5 @@
+    - Lidarr:
+        icon: lidarr.png
+        href: http://${HOST_IP}:8686
+        description: Albums (lossless)
+        container: lidarr

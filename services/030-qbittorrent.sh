@@ -13,6 +13,9 @@ Session\DefaultSavePath=$DATA/downloads
 Session\DisableAutoTMMByDefault=false
 Session\GlobalMaxRatio=1
 Session\ShareLimitAction=Stop
+Session\GlobalMaxSeedingMinutes=20160
+Session\GlobalMaxInactiveSeedingMinutes=4320
+Session\IgnoreSlowTorrentsForQueueing=true
 Session\Port=6881
 Session\QueueingSystemEnabled=true
 
@@ -24,7 +27,7 @@ WebUI\LocalHostAuth=true
 CONF
   cat_json() { printf '"%s": {"save_path": "%s", "download_path": null, "ratio_limit": 1, "share_limit_action": "Remove", "seeding_time_limit": -2, "inactive_seeding_time_limit": -2}' "$1" "$2"; }
   write_once "$C/categories.json" <<JSON
-{ $(cat_json movies "$DATA_MOVIES/downloads"), $(cat_json tv "$DATA_TV/downloads"), $(cat_json books "$DATA_BOOKS/downloads") }
+{ $(cat_json movies "$DATA_MOVIES/downloads"), $(cat_json tv "$DATA_TV/downloads"), $(cat_json books "$DATA_BOOKS/downloads"), $(cat_json lidarr "$DATA_MUSIC/downloads" | sed 's/"Remove"/"Stop"/') }
 JSON
   mkdir -p "$DATA/downloads"; chown "$PUID:$PGID" "$DATA/downloads"; chmod 2775 "$DATA/downloads"
   chown -R "$PUID:$PGID" "$APPDATA/qbittorrent"

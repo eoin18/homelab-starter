@@ -13,7 +13,7 @@ HS_COMMON=(--restart unless-stopped --add-host=host.docker.internal:host-gateway
 # Data roots mounted at the same path inside every media container (downloads + library must share a mount
 # for hardlinks). Per-type overrides outside $DATA get their own mount.
 HS_DATA_MOUNTS=(-v "$DATA:$DATA:rslave")
-for _r in "${DATA_MOVIES:-}" "${DATA_TV:-}" "${DATA_BOOKS:-}" "${DATA_ROMS:-}"; do
+for _r in "${DATA_MOVIES:-}" "${DATA_TV:-}" "${DATA_BOOKS:-}" "${DATA_ROMS:-}" "${DATA_MUSIC:-}"; do
   [ -n "$_r" ] && case "$_r/" in "$DATA"/*) ;; *) HS_DATA_MOUNTS+=(-v "$_r:$_r:rslave") ;; esac
 done
 HS_IDS=(-e PUID="$PUID" -e PGID="$PGID" -e UMASK=002)

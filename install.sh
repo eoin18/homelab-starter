@@ -39,8 +39,8 @@ if [ ${#ADD[@]} -gt 0 ] || [ ${#REMOVE[@]} -gt 0 ]; then BUNDLES=$(echo $BUNDLES
 : "${GPU:=auto}"; : "${REMOTE:=none}"
 [ "$GPU" = auto ] && { [ "$DET_GPU" = 1 ] && GPU=yes || GPU=none; }
 HOST_IP="${HOST_IP:-$DET_HOST_IP}"
-DATA_MOVIES="${DATA_MOVIES:-$DATA/movies}"; DATA_TV="${DATA_TV:-$DATA/tv}"; DATA_BOOKS="${DATA_BOOKS:-$DATA/books}"; DATA_ROMS="${DATA_ROMS:-$DATA/roms}"
-export BUNDLES DATA APPDATA TZ ADMIN_USER PUID PGID GPU REMOTE HOST_IP DATA_MOVIES DATA_TV DATA_BOOKS DATA_ROMS ZIGBEE_DEVICE TS_AUTHKEY CF_DOMAIN CF_TUNNEL_TOKEN CF_API_TOKEN BACKUP_TARGET 2>/dev/null || true
+DATA_MOVIES="${DATA_MOVIES:-$DATA/movies}"; DATA_TV="${DATA_TV:-$DATA/tv}"; DATA_BOOKS="${DATA_BOOKS:-$DATA/books}"; DATA_ROMS="${DATA_ROMS:-$DATA/roms}"; DATA_PHOTOS="${DATA_PHOTOS:-$DATA/photos}"; DATA_MUSIC="${DATA_MUSIC:-$DATA/music}"
+export BUNDLES DATA APPDATA TZ ADMIN_USER PUID PGID GPU REMOTE HOST_IP DATA_MOVIES DATA_TV DATA_BOOKS DATA_ROMS DATA_PHOTOS DATA_MUSIC ZIGBEE_DEVICE TS_AUTHKEY CF_DOMAIN CF_TUNNEL_TOKEN CF_API_TOKEN BACKUP_TARGET 2>/dev/null || true
 
 mapfile -t RESOLVED < <(bundles_resolve $BUNDLES)
 mapfile -t SERVICES < <(bundles_services "${RESOLVED[@]}")
@@ -68,8 +68,9 @@ step "Secrets"
 if [ -n "${ADMIN_PASSWORD:-}" ] && [ "$HS_DRY_RUN" != 1 ]; then env_set "$(secrets_file)" ADMIN_PASSWORD "$ADMIN_PASSWORD"; fi
 secret_ensure ADMIN_PASSWORD 20
 for s in "${SERVICES[@]}"; do   # API keys the *arr apps are started with, so wiring never has to scrape them
-  case "$s" in radarr|sonarr|prowlarr|bazarr) secret_ensure "$(echo "$s" | tr a-z A-Z)_API_KEY" 32 hex ;; esac
-  case "$s" in dockhand) secret_ensure DOCKHAND_ENCRYPTION_KEY 44 ;; speedtest-tracker) secret_ensure SPEEDTEST_KEY_SEED 32 ;; esac
+  case "$s" in radarr|sonarr|prowlarr|bazarr|lidarr) secret_ensure "$(echo "$s" | tr a-z A-Z)_API_KEY" 32 hex ;; esac
+  case "$s" in dockhand) secret_ensure DOCKHAND_ENCRYPTION_KEY 44 ;; speedtest-tracker) secret_ensure SPEEDTEST_KEY_SEED 32 ;;
+    paperless) secret_ensure PAPERLESS_DB_PASSWORD 32; secret_ensure PAPERLESS_SECRET_KEY 50 ;; immich-db) secret_ensure IMMICH_DB_PASSWORD 32 ;; esac
 done
 env_load "$(secrets_file)"; set -a; env_load "$(secrets_file)"; set +a
 ok "secrets in $(secrets_file)"

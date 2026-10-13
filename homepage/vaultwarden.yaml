@@ -1,0 +1,5 @@
+    - Vaultwarden:
+        icon: vaultwarden.png
+        href: http://${HOST_IP}:8094
+        description: Passwords
+        container: vaultwarden

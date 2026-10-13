@@ -14,6 +14,8 @@ layout_create() {  # layout_create <bundle...>
   in_list media-server "$@" && dirs+=("$DATA_MOVIES/library" "$DATA_TV/library")
   in_list books "$@" && dirs+=("$DATA_BOOKS"/{library,ingest,downloads})
   in_list games "$@" && dirs+=("$DATA_ROMS"/library/{roms,bios})
+  in_list music "$@" && dirs+=("$DATA_MUSIC"/{library,downloads,grabber,aurral})
+  in_list photos "$@" && dirs+=("$DATA_PHOTOS/immich")
   local d
   for d in $(printf '%s\n' "${dirs[@]}" | awk '!s[$0]++'); do
     [ -d "$d" ] || run mkdir -p "$d"

@@ -1,0 +1,5 @@
+    - Termix:
+        icon: termix.png
+        href: http://${HOST_IP}:8093
+        description: Web terminal and files
+        container: termix

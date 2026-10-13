@@ -1,0 +1,5 @@
+    - Navidrome:
+        icon: navidrome.png
+        href: http://${HOST_IP}:4533
+        description: Music streaming
+        container: navidrome

@@ -1,0 +1,5 @@
+    - Immich:
+        icon: immich.png
+        href: http://${HOST_IP}:2283
+        description: Photos and videos
+        container: immich

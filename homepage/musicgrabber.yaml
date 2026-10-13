@@ -1,0 +1,5 @@
+    - MusicGrabber:
+        icon: mdi-music-box-multiple
+        href: http://${HOST_IP}:38274
+        description: Songs and playlists
+        container: musicgrabber
