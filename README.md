@@ -15,17 +15,12 @@ Prefer to read it first? `git clone https://github.com/eoin18/homelab-starter &&
 
 ## What you get
 
-```mermaid
-flowchart LR
-  menu["Menu<br/>pick bundles, folders, remote access"] --> cfg[config.env]
-  cfg --> run["Containers<br/>one script per app"]
-  run --> wire["Wiring<br/>apps configured through their own APIs"]
-  wire --> dash["Dashboard<br/>Homepage, every app as a tile"]
-  wire --> finish["Finish-setup page<br/>the few steps only you can do"]
-  run -.-> upd["Dockhand<br/>nightly image updates, skipped if they add vulnerabilities"]
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagram/starter-dark.png">
+  <img alt="Bundles by theme and layer: remote access, apps, behind the apps, core, machine" src="docs/diagram/starter-light.png">
+</picture>
 
-Then open the dashboard. Anything that needs a human (signing in to Tailscale, choosing your indexers,
+When the installer finishes, open the dashboard. Anything that needs a human (signing in to Tailscale, choosing your indexers,
 pairing a Zigbee stick) is listed on the **Finish setup** page with a link straight to the right screen.
 Generated passwords are in `CREDENTIALS.txt` in your app-data folder (`sudo cat` it).
 
@@ -91,4 +86,5 @@ Details in [docs/profiles.md](docs/profiles.md). The author's own server is rebu
 
 - [DESIGN.md](DESIGN.md): how the installer works, bundle by bundle.
 - [docs/profiles.md](docs/profiles.md): profiles, override files, capture.
+- `tools/diagram.py`: draws the diagram above from [docs/diagram/starter.json](docs/diagram/starter.json) (app icons from [dashboard-icons](https://github.com/homarr-labs/dashboard-icons) and [selfh.st/icons](https://github.com/selfhst/icons)).
 - [LICENSE](LICENSE)

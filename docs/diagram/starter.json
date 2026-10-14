@@ -1,0 +1,70 @@
+{
+  "title": "homelab-starter",
+  "subtitle": "Pick bundles from a menu; every app is installed, wired to the others and added to the dashboard.",
+  "layers": [
+    {"name": "Reach it", "note": "optional: from outside the house", "groups": [
+      {"name": "Remote access", "color": "#6b7cff", "items": [
+        {"name": "Tailscale", "icon": "tailscale", "note": "private, recommended"},
+        {"name": "Cloudflare", "icon": "cloudflare", "note": "your domain + Access"}]}]},
+    {"link": "or straight in at home"},
+    {"name": "Apps", "note": "bundles by theme: pick any", "groups": [
+      {"name": "Movies & TV", "color": "#e5484d", "items": [
+        {"name": "Jellyfin", "icon": "jellyfin", "note": "watch"},
+        {"name": "Seerr", "icon": "seerr", "note": "requests"},
+        {"name": "Radarr", "icon": "radarr", "note": "movies"},
+        {"name": "Sonarr", "icon": "sonarr", "note": "TV"},
+        {"name": "Bazarr", "icon": "bazarr", "note": "subtitles"},
+        {"name": "Maintainerr", "icon": "maintainerr", "note": "cleanup"}]},
+      {"name": "Music", "color": "#2fa86d", "items": [
+        {"name": "Navidrome", "icon": "navidrome", "note": "listen"},
+        {"name": "Lidarr", "icon": "lidarr", "note": "albums"},
+        {"name": "MusicGrabber", "note": "songs, playlists"},
+        {"name": "Aurral", "icon": "aurral", "note": "discovery"}]},
+      {"name": "Photos", "color": "#f2a33a", "items": [
+        {"name": "Immich", "icon": "immich", "note": "phone backup, search"}]},
+      {"name": "Documents", "color": "#3d8b5a", "items": [
+        {"name": "Paperless", "icon": "paperless-ngx", "note": "scans + OCR"}]},
+      {"name": "Books", "color": "#a0763d", "items": [
+        {"name": "Calibre-Web", "icon": "calibre-web", "note": "library"},
+        {"name": "Shelfmark", "icon": "shelfmark", "note": "requests"}]},
+      {"name": "Games", "color": "#8b5cf6", "items": [
+        {"name": "RomM", "icon": "romm", "note": "ROM library"}]},
+      {"name": "Passwords", "color": "#175ddc", "items": [
+        {"name": "Vaultwarden", "icon": "vaultwarden", "note": "Bitwarden apps"}]},
+      {"name": "Smart home", "color": "#18bcf2", "items": [
+        {"name": "Home Assistant", "icon": "home-assistant"},
+        {"name": "Mosquitto", "icon": "mosquitto", "note": "MQTT"},
+        {"name": "Zigbee2MQTT", "icon": "zigbee2mqtt", "note": "Zigbee"},
+        {"name": "Scrypted", "icon": "scrypted", "note": "cameras"}]}]},
+    {"name": "Behind the apps", "note": "added when needed, or picked", "groups": [
+      {"name": "Downloads", "tag": "automatic", "color": "#5b6b7a", "items": [
+        {"name": "qBittorrent", "icon": "qbittorrent"},
+        {"name": "Prowlarr", "icon": "prowlarr", "note": "indexers"},
+        {"name": "FlareSolverr", "icon": "flaresolverr"}]},
+      {"name": "Monitoring", "color": "#d6409f", "items": [
+        {"name": "Beszel", "icon": "beszel", "note": "server stats"},
+        {"name": "Uptime Kuma", "icon": "uptime-kuma", "note": "checks"},
+        {"name": "Dozzle", "icon": "dozzle", "note": "logs"},
+        {"name": "Speedtest", "icon": "speedtest-tracker"},
+        {"name": "ntfy", "icon": "ntfy", "note": "phone alerts"}]},
+      {"name": "Network, sync & backup", "color": "#0f9d9a", "items": [
+        {"name": "Pi-hole", "icon": "pi-hole", "note": "ad-blocking DNS"},
+        {"name": "Syncthing", "icon": "syncthing", "note": "folder sync"},
+        {"name": "Duplicati", "icon": "duplicati", "note": "encrypted backup"}]},
+      {"name": "Admin", "color": "#444c56", "items": [
+        {"name": "Termix", "icon": "termix", "note": "web terminal"}]}]},
+    {"name": "Core", "note": "always installed", "groups": [
+      {"name": "Run it", "items": [
+        {"name": "Homepage", "icon": "homepage", "note": "dashboard, every app"},
+        {"name": "Finish setup", "glyph": "check", "note": "the steps only you can do"},
+        {"name": "Dockhand", "icon": "dockhand", "note": "nightly safe updates"}]}]},
+    {"link": "install.sh: menu → docker run per app → wiring through each app's API"},
+    {"name": "Machine", "note": "x86_64 or arm64", "groups": [
+      {"name": "Host", "color": "#e95420", "items": [
+        {"name": "Docker", "icon": "docker", "note": "plain docker run, no compose"},
+        {"name": "Linux", "icon": "ubuntu", "note": "Ubuntu, Debian, Pi OS, Fedora"}]},
+      {"name": "Your folders", "color": "#5b6b7a", "items": [
+        {"name": "/data", "glyph": "folder", "note": "media, photos, books, ROMs"},
+        {"name": "app data", "glyph": "database", "note": "settings + databases (backed up)"}]}]}
+  ]
+}
