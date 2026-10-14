@@ -107,6 +107,8 @@ preflight → install packages/Docker → create layout → generate secrets →
   KnownProxies set.
 - Seerr: initialised against Jellyfin + Radarr/Sonarr. Bazarr: Radarr/Sonarr + same-path mapping. Maintainerr: Jellyfin/Seerr/arrs.
 - Books: CWA library + ingest; Shelfmark → CWA ingest, Prowlarr, qBittorrent `books`.
+- Audiobooks & podcasts: Audiobookshelf; wiring creates the admin + an Audiobooks ($DATA_AUDIOBOOKS) and a Podcasts ($DATA_PODCASTS)
+  library; folders under $DATA_MUSIC are added to Navidrome's .ndignore.
 - Games: RomM + MariaDB (generated passwords), library folder, nightly DB dump cron.
 - Smart home: Home Assistant onboarding left to the user (needs their location/account), Mosquitto user created,
   Zigbee2MQTT → Mosquitto; HA MQTT integration pre-filled where possible.

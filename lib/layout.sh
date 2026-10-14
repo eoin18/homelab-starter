@@ -15,6 +15,7 @@ layout_create() {  # layout_create <bundle...>
   in_list books "$@" && dirs+=("$DATA_BOOKS"/{library,ingest,downloads})
   in_list games "$@" && dirs+=("$DATA_ROMS"/library/{roms,bios})
   in_list music "$@" && dirs+=("$DATA_MUSIC"/{library,downloads,grabber,aurral})
+  in_list audiobooks "$@" && dirs+=("$DATA_AUDIOBOOKS" "$DATA_PODCASTS")
   in_list photos "$@" && dirs+=("$DATA_PHOTOS/immich")
   local d
   for d in $(printf '%s\n' "${dirs[@]}" | awk '!s[$0]++'); do

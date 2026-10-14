@@ -1,0 +1,5 @@
+    - Audiobookshelf:
+        icon: audiobookshelf.png
+        href: http://${HOST_IP}:13378
+        description: Audiobooks & podcasts
+        container: audiobookshelf

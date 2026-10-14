@@ -13,7 +13,8 @@ if any(j['Backup']['Name'] == 'App settings' for j in jobs or []):
 pp = E.get('BACKUP_PASSPHRASE') or secrets.token_urlsafe(24)
 save_secret('BACKUP_PASSPHRASE', pp)
 src = '/source' + E['APPDATA'].rstrip('/') + '/'
-excl = ['paperless-db', 'immich-db', 'romm-db', 'jellyfin/cache', 'immich-ml', 'romm/redis', 'paperless-redis', 'immich-redis']
+excl = ['paperless-db', 'immich-db', 'romm-db', 'jellyfin/cache', 'immich-ml', 'romm/redis', 'paperless-redis', 'immich-redis',
+        'audiobookshelf/metadata/cache', 'audiobookshelf/metadata/streams', 'audiobookshelf/metadata/logs']
 start = (datetime.datetime.now() + datetime.timedelta(days=1)).replace(hour=4, minute=15, second=0, microsecond=0)
 body = {'Backup': {'Name': 'App settings', 'Description': 'homelab-starter: app settings + database dumps', 'Tags': [],
                    'TargetURL': 'file:///backups/homelab-starter', 'Sources': [src],

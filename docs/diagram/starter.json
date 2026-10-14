@@ -26,7 +26,8 @@
         {"name": "Paperless", "icon": "paperless-ngx", "note": "scans + OCR"}]},
       {"name": "Books", "color": "#a0763d", "items": [
         {"name": "Calibre-Web", "icon": "calibre-web", "note": "library"},
-        {"name": "Shelfmark", "icon": "shelfmark", "note": "requests"}]},
+        {"name": "Shelfmark", "icon": "shelfmark", "note": "requests"},
+        {"name": "Audiobookshelf", "icon": "audiobookshelf", "note": "audiobooks + podcasts"}]},
       {"name": "Games", "color": "#8b5cf6", "items": [
         {"name": "RomM", "icon": "romm", "note": "ROM library"}]},
       {"name": "Passwords", "color": "#175ddc", "items": [

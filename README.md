@@ -33,6 +33,7 @@ Generated passwords are in `CREDENTIALS.txt` in your app-data folder (`sudo cat`
 | Music | Lidarr (albums), Navidrome (streaming), MusicGrabber (songs/playlists), Aurral (discovery) | Downloads |
 | Photos | Immich: phone backup with face and object search | |
 | Books | Calibre-Web-Automated, Shelfmark (requests) | Downloads |
+| Audiobooks & podcasts | Audiobookshelf: listening progress synced across phone, web and car; new episodes download automatically | |
 | Games | RomM: a web library for your ROMs (no downloader) | |
 | Documents | Paperless-ngx: searchable archive with OCR | |
 | Passwords | Vaultwarden (Bitwarden-compatible) | HTTPS: Tailscale or Cloudflare |
