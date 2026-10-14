@@ -10,9 +10,6 @@ curl -fsSL https://raw.githubusercontent.com/eoin18/homelab-starter/main/get.sh 
 ```
 Prefer to read it first? `git clone https://github.com/eoin18/homelab-starter && sudo ./homelab-starter/install.sh`
 
-> **Status: pre-release.** Every bundle below installs and wires up; a full rebuild-from-scratch drill
-> comes before the first tagged release.
-
 ## What you get
 
 <picture>
