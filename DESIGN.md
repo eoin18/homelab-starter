@@ -154,7 +154,7 @@ Debian 12 (x86); Raspberry Pi OS arm64 on real hardware.
   services become `overrides/<svc>` (secrets as ${VAR}), unknown containers become `extras/<name>.sh` (marked unreviewed), removed
   ones are disabled, redundant overrides are pruned; leak scan → commit/push → ntfy summary. Alerts only for diffs that can't be
   expressed as an override. Image digests (Dockhand updates) are ignored. Bumping the starter submodule renders + recreates first,
-  so the sync never captures stale live config as overrides that undo catalogue improvements. Personal services (gamarr, romarr, ROM pipeline) stay as profile extras.
+  so the sync never captures stale live config as overrides that undo catalogue improvements. Personal services (gamarr, ROM pipeline) stay as profile extras.
 - **Build order:** catalogue refresh → profile/overrides/extras/render → author profile until zero drift → switch the private
   repo over (retire its services/) → VM restore drill via the new path (also completes the private repo's Phase F) → tag release.
   All done: drill passed 2026-10-14 (author's server rebuilt from backup, data verified), released as v1.0.0.
