@@ -63,6 +63,11 @@ menu_run() {
   if in_list zigbee $BUNDLES; then
     ZIGBEE_DEVICE=$(wt_or_quit --inputbox "Zigbee coordinator: a /dev/serial/by-id/... path, or tcp://IP:6638 for a network coordinator" 10 90 "${ZIGBEE_DEVICE:-${DET_ZIGBEE:-}}")
   fi
+  if in_list torrent-vpn $BUNDLES; then
+    VPN_SERVICE_PROVIDER=$(wt_or_quit --inputbox "VPN provider, as Gluetun names it (protonvpn, airvpn, private internet access, ...). Port forwarding works with protonvpn, airvpn and PIA." 10 90 "${VPN_SERVICE_PROVIDER:-protonvpn}")
+    VPN_WIREGUARD_PRIVATE_KEY=$(wt_or_quit --passwordbox "WireGuard private key from your provider's WireGuard config (Proton: create it with NAT-PMP on)" 9 90)
+    VPN_SERVER_COUNTRIES=$(wt_or_quit --inputbox "Server countries, comma-separated (nearby is fastest, e.g. Ireland,United Kingdom)" 9 90 "${VPN_SERVER_COUNTRIES:-}")
+  fi
   if in_list backup $BUNDLES; then
     BACKUP_TARGET=$(wt_or_quit --inputbox "Backup destination folder (another disk is best). You can add cloud targets later in Duplicati." 9 78 "${BACKUP_TARGET:-/mnt/backup}")
   fi
@@ -78,7 +83,7 @@ config_write() {
   [ "$HS_DRY_RUN" = 1 ] && { info "[dry-run] would write $f"; return; }
   : > "$f"; chmod 600 "$f"
   echo "# homelab-starter settings — edit and re-run install.sh, or run install.sh --reconfigure" >> "$f"
-  for k in BUNDLES TZ PUID PGID DATA DATA_MOVIES DATA_TV DATA_BOOKS DATA_ROMS APPDATA ADMIN_USER GPU ZIGBEE_DEVICE REMOTE TS_AUTHKEY CF_DOMAIN CF_TUNNEL_TOKEN CF_API_TOKEN BACKUP_TARGET; do
+  for k in BUNDLES TZ PUID PGID DATA DATA_MOVIES DATA_TV DATA_BOOKS DATA_ROMS APPDATA ADMIN_USER GPU ZIGBEE_DEVICE REMOTE TS_AUTHKEY CF_DOMAIN CF_TUNNEL_TOKEN CF_API_TOKEN BACKUP_TARGET VPN_SERVICE_PROVIDER VPN_WIREGUARD_PRIVATE_KEY VPN_SERVER_COUNTRIES VPN_PORT_FORWARDING; do
     env_set "$f" "$k" "${!k:-}"
   done
 }

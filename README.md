@@ -45,6 +45,7 @@ Generated passwords are in `CREDENTIALS.txt` in your app-data folder (`sudo cat`
 | Backup | Duplicati: encrypted backups of app settings and databases | |
 | Monitoring | Beszel, Dozzle, Uptime Kuma, Speedtest Tracker, ntfy (phone alerts) | |
 | Admin tools | Termix: web terminal and file manager | |
+| Torrent VPN | Gluetun: qBittorrent only reaches the internet through your VPN (kill switch), with port forwarding | Downloads, a VPN subscription (Proton, AirVPN, PIA, ...) |
 | Remote: Tailscale *(recommended)* | private access from your own devices | a free Tailscale account |
 | Remote: Cloudflare *(advanced)* | public URLs on your own domain behind Cloudflare Access | a domain on Cloudflare |
 

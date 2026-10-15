@@ -75,6 +75,7 @@ REMOTE="none"                   # none | tailscale | cloudflare
 TS_AUTHKEY=""                   # optional; else a login link is printed
 CF_TUNNEL_TOKEN=""; CF_DOMAIN=""; CF_API_TOKEN=""   # cloudflare only
 BACKUP_TARGET=""                # backup bundle only
+VPN_SERVICE_PROVIDER="protonvpn"; VPN_WIREGUARD_PRIVATE_KEY=""; VPN_SERVER_COUNTRIES=""; VPN_PORT_FORWARDING="on"   # torrent-vpn only
 ```
 Generated secrets go to `$APPDATA/.secrets.env` (600). A human-readable `$APPDATA/CREDENTIALS.txt` (600)
 lists every URL + login at the end.
@@ -109,6 +110,10 @@ preflight → install packages/Docker → create layout → generate secrets →
 - Books: CWA library + ingest; Shelfmark → CWA ingest, Prowlarr, qBittorrent `books`.
 - Audiobooks & podcasts: Audiobookshelf; wiring creates the admin + an Audiobooks ($DATA_AUDIOBOOKS) and a Podcasts ($DATA_PODCASTS)
   library; folders under $DATA_MUSIC are added to Navidrome's .ndignore.
+- Torrent VPN: Gluetun (WireGuard) owns the network qBittorrent runs in (`--network container:gluetun`), so torrents
+  have no route but the tunnel; the web UI port moves to gluetun. A forwarded port is pushed into qBittorrent by
+  gluetun's up-command (`$APPDATA/gluetun/qbt-port.sh`, localhost auth off). If gluetun is recreated, qBittorrent
+  must be recreated too (the installer does both, in order).
 - Games: RomM + MariaDB (generated passwords), library folder, nightly DB dump cron.
 - Smart home: Home Assistant onboarding left to the user (needs their location/account), Mosquitto user created,
   Zigbee2MQTT → Mosquitto; HA MQTT integration pre-filled where possible.

@@ -41,7 +41,8 @@
       {"name": "Downloads", "tag": "automatic", "color": "#5b6b7a", "items": [
         {"name": "qBittorrent", "icon": "qbittorrent"},
         {"name": "Prowlarr", "icon": "prowlarr", "note": "indexers"},
-        {"name": "FlareSolverr", "icon": "flaresolverr"}]},
+        {"name": "FlareSolverr", "icon": "flaresolverr"},
+        {"name": "Gluetun", "icon": "gluetun", "note": "torrent VPN (optional)"}]},
       {"name": "Monitoring", "color": "#d6409f", "items": [
         {"name": "Beszel", "icon": "beszel", "note": "server stats"},
         {"name": "Uptime Kuma", "icon": "uptime-kuma", "note": "checks"},

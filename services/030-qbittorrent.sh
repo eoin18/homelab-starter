@@ -33,9 +33,19 @@ JSON
   chown -R "$PUID:$PGID" "$APPDATA/qbittorrent"
 fi
 recreate qbittorrent
-docker run -d --name qbittorrent "${HS_COMMON[@]}" "${HS_IDS[@]}" \
-  -p 8085:8085 -p 6881:6881 -p 6881:6881/udp \
-  -e WEBUI_PORT=8085 -e TORRENTING_PORT=6881 \
+if case " ${BUNDLES:-} " in *" torrent-vpn "*) true ;; *) false ;; esac; then
+  # inside gluetun's network: no ports of its own, no --add-host (both belong to gluetun), and no fixed
+  # torrenting port (gluetun sets the forwarded one through the API, which localhost may call without login)
+  C="$APPDATA/qbittorrent/qBittorrent/qBittorrent.conf"
+  if [ "${HS_DRY_RUN:-0}" != 1 ] && [ "${HS_RENDER:-0}" != 1 ] && [ -e "$C" ]; then
+    if grep -q '^WebUI\\LocalHostAuth=' "$C"; then sed -i 's/^WebUI\\LocalHostAuth=.*/WebUI\\LocalHostAuth=false/' "$C"
+    else sed -i '/^\[Preferences\]/a WebUI\\LocalHostAuth=false' "$C"; fi
+  fi
+  QB_NET=(--restart unless-stopped -e TZ="$TZ" --network container:gluetun -e WEBUI_PORT=8085)
+else
+  QB_NET=("${HS_COMMON[@]}" -p 8085:8085 -p 6881:6881 -p 6881:6881/udp -e WEBUI_PORT=8085 -e TORRENTING_PORT=6881)
+fi
+docker run -d --name qbittorrent "${QB_NET[@]}" "${HS_IDS[@]}" \
   -v "$APPDATA/qbittorrent:/config" \
   "${HS_DATA_MOUNTS[@]}" \
   lscr.io/linuxserver/qbittorrent:latest

@@ -164,7 +164,11 @@ def from_container(name):
     s = Spec(); s.set('-d', True); s.set('--name', name)
     rp = hc['RestartPolicy']['Name']
     if rp and rp != 'no': s.set('--restart', rp if rp != 'on-failure' or not hc['RestartPolicy'].get('MaximumRetryCount') else f"on-failure:{hc['RestartPolicy']['MaximumRetryCount']}")
-    if hc['NetworkMode'] not in ('default', 'bridge'): s.set('--network', hc['NetworkMode'])
+    nm = hc['NetworkMode']
+    if nm.startswith('container:'):   # docker stores the id; scripts name the container
+        try: nm = 'container:' + _inspect(nm[10:])['Name'].lstrip('/')
+        except Exception: pass
+    if nm not in ('default', 'bridge'): s.set('--network', nm)
     for h in hc.get('ExtraHosts') or []: s.set('--add-host', h)
     hcfg = cfg.get('Healthcheck')
     if hcfg and hcfg != img.get('Healthcheck') and hcfg.get('Test'):
