@@ -106,7 +106,7 @@ for s in "${SERVICES[@]}"; do   # API keys the *arr apps are started with, so wi
   case "$s" in dockhand) secret_ensure DOCKHAND_ENCRYPTION_KEY 44 ;; speedtest-tracker) secret_ensure SPEEDTEST_KEY_SEED 32 ;;
     paperless) secret_ensure PAPERLESS_DB_PASSWORD 32; secret_ensure PAPERLESS_SECRET_KEY 50 ;; immich-db) secret_ensure IMMICH_DB_PASSWORD 32 ;;
     romm-db) secret_ensure ROMM_DB_PASSWORD 32; secret_ensure ROMM_DB_ROOT_PASSWORD 32 ;; romm) secret_ensure ROMM_AUTH_SECRET_KEY 64 hex ;;
-    duplicati) secret_ensure DUPLICATI_SETTINGS_KEY 32 ;; esac
+    duplicati) secret_ensure DUPLICATI_SETTINGS_KEY 32 ;; gluetun) secret_ensure GLUETUN_API_KEY 32 ;; esac
 done
 env_load "$(secrets_file)"; set -a; env_load "$(secrets_file)"; set +a
 ok "secrets in $(secrets_file)"

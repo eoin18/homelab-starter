@@ -1,0 +1,10 @@
+    - Gluetun:
+        icon: gluetun.png
+        description: Torrent VPN
+        container: gluetun
+        widget:
+          type: gluetun
+          url: http://host.docker.internal:8000
+          key: ${GLUETUN_API_KEY}
+          version: 2
+          fields: ["public_ip", "country", "port_forwarded"]

@@ -23,10 +23,24 @@ done
 SH
   fi
 fi
+# Control API (status, public IP, forwarded port) for the dashboard widget: read-only routes behind an API key,
+# published only on the docker bridge gateway (host.docker.internal), not on the LAN.
+if [ "${HS_DRY_RUN:-0}" != 1 ] && [ "${HS_RENDER:-0}" != 1 ]; then
+  mkdir -p "$APPDATA/gluetun/auth"
+  ( umask 077; cat > "$APPDATA/gluetun/auth/config.toml" <<TOML
+[[roles]]
+name = "dashboard"
+routes = ["GET /v1/publicip/ip", "GET /v1/portforward", "GET /v1/openvpn/portforwarded", "GET /v1/vpn/status"]
+auth = "apikey"
+apikey = "${GLUETUN_API_KEY:-}"
+TOML
+  )
+fi
+GW=$(command docker network inspect bridge -f '{{(index .IPAM.Config 0).Gateway}}' 2>/dev/null || echo 172.17.0.1)
 recreate gluetun
 docker run -d --name gluetun "${HS_COMMON[@]}" \
   --cap-add NET_ADMIN --device /dev/net/tun:/dev/net/tun \
-  -p 8085:8085 \
+  -p 8085:8085 -p "$GW:8000:8000" \
   -e VPN_SERVICE_PROVIDER="$PROVIDER" -e VPN_TYPE=wireguard \
   -e WIREGUARD_PRIVATE_KEY="${VPN_WIREGUARD_PRIVATE_KEY:-}" \
   -e SERVER_COUNTRIES="${VPN_SERVER_COUNTRIES:-}" \
