@@ -5,8 +5,9 @@
 # Browser SSH terminal with tabs/splits and an SFTP file manager — also for managing other servers.
 # A dedicated SSH key for it is created in $APPDATA/termix-ssh (see the Finish-setup page).
 source "$HS_ROOT/lib/service.sh"
-if [ "${HS_DRY_RUN:-0}" != 1 ]; then
-  K="$APPDATA/termix-ssh/id_ed25519"; U="${SUDO_USER:-$ADMIN_SYSUSER}"; UH=$(getent passwd "$U" | cut -d: -f6)
+# Only on a fresh install: an existing Termix keeps whatever keys its hosts already trust (recreating it must not add one).
+if [ "${HS_DRY_RUN:-0}" != 1 ] && [ ! -d "$APPDATA/termix" ]; then
+  K="$APPDATA/termix-ssh/id_ed25519"; U="${SUDO_USER:-${ADMIN_SYSUSER:-}}"; UH=$( [ -n "$U" ] && getent passwd "$U" | cut -d: -f6)
   if [ ! -f "$K" ]; then mkdir -p "$(dirname "$K")"; ssh-keygen -q -t ed25519 -N '' -C "termix@$(hostname)" -f "$K"; fi
   if [ -n "$UH" ]; then mkdir -p "$UH/.ssh"; touch "$UH/.ssh/authorized_keys"
     grep -qF "$(cut -d' ' -f2 "$K.pub")" "$UH/.ssh/authorized_keys" || cat "$K.pub" >> "$UH/.ssh/authorized_keys"

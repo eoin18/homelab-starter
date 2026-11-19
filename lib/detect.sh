@@ -19,7 +19,10 @@ detect_all() {
   [ -n "$DET_ZIGBEE" ] && DET_ZIGBEE="/dev/serial/by-id/$DET_ZIGBEE"
   command -v docker >/dev/null 2>&1 && DET_DOCKER=1 || DET_DOCKER=0
   DET_TZ=$(timedatectl show -p Timezone --value 2>/dev/null || cat /etc/timezone 2>/dev/null || echo UTC)
-  DET_USER="${SUDO_USER:-$(logname 2>/dev/null || echo root)}"
+  # the human behind the run: sudo's caller, else whoever runs it (--only works without root; logname fails with no tty)
+  if [ -n "${SUDO_USER:-}" ]; then DET_USER=$SUDO_USER
+  elif [ "$(id -u)" -ne 0 ]; then DET_USER=$(id -un)
+  else DET_USER=$(logname 2>/dev/null || echo root); fi
   DET_UID=$(id -u "$DET_USER" 2>/dev/null || echo 1000)
   DET_HOST_IP=$( { ip -4 route get 1.1.1.1 2>/dev/null || true; } | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')
 }
